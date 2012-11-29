@@ -206,7 +206,7 @@ bool ofxYouTubeVideoUploader::refreshAccess(){
     }
     else {
         authInfo.access_time = ofGetElapsedTimeMillis();
-        authInfo.expires_in = 60;//json.get("expires_in","0").asInt();
+        authInfo.expires_in = json.get("expires_in","0").asInt();
         authInfo.token_type = json.get("token_type", "").asString();
         authInfo.bIsAuthorized = true;
         authInfo.getJSONElement().save(authInfo.jsonFile,true);
