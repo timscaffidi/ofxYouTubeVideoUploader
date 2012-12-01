@@ -25,8 +25,21 @@ void testApp::draw(){
         stringstream ss;
         ofxYouTubeOAuthInfo info = ytUploader.getAuthInfo();
         ss<< "Authorized!\n"
-        << "expires in: " << ((info.access_time + info.expires_in*1000) - ofGetElapsedTimeMillis())/1000.0 << " seconds\n"
-        << (ytUploader.isUploading()?"uploading...":"press any key to upload a video.");
+        << "expires in: " << ((info.access_time + info.expires_in*1000) - ofGetElapsedTimeMillis())/1000.0 << " seconds\n";
+        int uploadStatus = ytUploader.getUploadStatus();
+        if(uploadStatus == ytUploader.UPLOAD_NOT_STARTED) {
+            ss << "press any key to upload a video.";
+        }
+        else if(uploadStatus == ytUploader.UPLOADING) {
+            ss << "uploading...";
+        }
+        else if(uploadStatus == ytUploader.UPLOAD_FAILED) {
+            ss << "upload failed :(";
+        }
+        else if(uploadStatus == ytUploader.UPLOAD_SUCCESS) {
+            ss << "upload success! Please find the video at: " << ytUploader.getUploadedVideoURL() << endl
+            << "press and key to upload another video.";
+        }
         ofDrawBitmapString(ss.str(), 20,20);
     }
 }

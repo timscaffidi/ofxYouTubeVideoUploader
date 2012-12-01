@@ -74,6 +74,12 @@ struct ofxYouTubeOAuthInfo {
 
 class ofxYouTubeVideoUploader : private ofThread {
 public:
+    enum uploadStatus {
+        UPLOAD_FAILED,
+        UPLOAD_NOT_STARTED,
+        UPLOADING,
+        UPLOAD_SUCCESS
+    };
     ofxYouTubeVideoUploader();
     ~ofxYouTubeVideoUploader();
     void setup(string settingsFileName);
@@ -84,8 +90,10 @@ public:
     string getUserCode() { return authInfo.user_code; }
     string getVerificationUrl() { return authInfo.verification_url; }
     bool isAuthorized() { return authInfo.bIsAuthorized; }
-    bool isUploading(){return bIsUploading;}
     ofxYouTubeOAuthInfo getAuthInfo() { return authInfo; }
+    uploadStatus getUploadStatus() { return mUploadStatus; }
+    string getUploadedVideoURL() { return mUploadedURL; }
+    bool launchBrowser;
 private:
     void threadedFunction();
     void setup();
@@ -93,7 +101,8 @@ private:
     bool pollAccessServer();
     bool refreshAccess();
     
-    bool bIsUploading;
+    uploadStatus mUploadStatus;
+    string mUploadedURL;
 
     ofxYouTubeOAuthInfo authInfo;
     ofxSSL curl;

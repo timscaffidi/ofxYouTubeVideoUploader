@@ -10,13 +10,14 @@
 ofxYouTubeVideoUploader::ofxYouTubeVideoUploader(){
     curl.setup();
     authInfo.bIsAuthorized = false;
-    bIsUploading = false;
+    mUploadedURL = "";
+    mUploadStatus = UPLOAD_NOT_STARTED;
     lastPollTime = 0;
+    launchBrowser = true;
 }
 ofxYouTubeVideoUploader::~ofxYouTubeVideoUploader(){
     authInfo.getJSONElement().save(authInfo.jsonFile,true);
 }
-
 
 void ofxYouTubeVideoUploader::setup(string settingsFileName){
     ofxJSONElement json;
@@ -34,6 +35,7 @@ void ofxYouTubeVideoUploader::setup(ofxYouTubeOAuthInfo info){
 void ofxYouTubeVideoUploader::setup(){
     //check that required fields are populated
     bool requiredFields = true;
+    
     requiredFields &= !authInfo.dev_key.empty();
     requiredFields &= !authInfo.client_id.empty();
     requiredFields &= !authInfo.client_secret.empty();
@@ -78,13 +80,29 @@ void ofxYouTubeVideoUploader::threadedFunction() {
             }
             
             //if we need to upload
-            if(bIsUploading){
+            if(mUploadStatus == UPLOADING){
                 curl.perform();
                 
-                //TODO: check response header for "201 Created"
+                string header = curl.getResponseHeader();
+                if(curl.getResponseHeader().find("201 Created") != string::npos){
+                    //good response. extract url
+                    size_t url_start = header.find("uploads/");
+                    size_t url_end = header.find("Content-Location: ");
+                    if(url_start!=string::npos && url_end!=string::npos) {
+                        url_start+=8;
+                        mUploadedURL = "http://youtube.com/watch?v=" + header.substr(url_start, url_end-url_start-1);
+                        if(launchBrowser) ofLaunchBrowser(mUploadedURL);
+                    }
+                    mUploadStatus = UPLOAD_SUCCESS;
+                }
+                else {
+                    mUploadStatus = UPLOAD_FAILED;
+                    ofLogError() << "ofxYouTubeVideoUploader::threadedFunction(): upload failed:" << endl
+                    << header << endl
+                    << header << endl;
+                }
                 
                 curl.cleanup();
-                bIsUploading=false;
             }
             
             ofSleepMillis(500);
@@ -125,7 +143,7 @@ string ofxYouTubeVideoUploader::requestAccess(){
     authInfo.access_time = ofGetElapsedTimeMillis();
     
     if(!authInfo.verification_url.empty()){
-        ofLaunchBrowser(authInfo.verification_url);
+        if(launchBrowser) ofLaunchBrowser(authInfo.verification_url);
         authInfo.bIsPolling = true;
     }
     
@@ -247,7 +265,7 @@ void ofxYouTubeVideoUploader::uploadVideoFile(string path, string fileName){
         //moved to threaded function
 //        curl.perform();
 //        curl.cleanup();
-        bIsUploading = true;
+        mUploadStatus = UPLOADING;
         if(isThreadRunning()){
             
             startThread(false,false);
