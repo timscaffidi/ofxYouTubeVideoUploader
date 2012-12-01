@@ -9,3 +9,5 @@ Once the app has been authenticated, it will periodically refresh its access, if
 **Requires modified ofxSSL and ofxJSON**
 https://github.com/timscaffidi/ofxJSON.git
 https://github.com/timscaffidi/ofxSSL.git
+
+created by [Timothy Scaffidi](https://github.com/timscaffidi) for [Helios Interactive](https://github.com/heliosinteractive)
