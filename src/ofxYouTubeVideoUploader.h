@@ -85,7 +85,7 @@ public:
     void setup(string settingsFileName);
     void setup(ofxYouTubeOAuthInfo info);
     
-    void uploadVideoFile(string path, string fileName);
+    void uploadVideoFile(string path, string fileName, string title="", string description="", string keywords="");
     bool isWaitingForAuthorization() { return authInfo.bIsPolling; }
     string getUserCode() { return authInfo.user_code; }
     string getVerificationUrl() { return authInfo.verification_url; }
@@ -103,6 +103,8 @@ private:
     
     uploadStatus mUploadStatus;
     string mUploadedURL;
+    
+    string getMetaDataXMLString(string title, string description, string keywords);
 
     ofxYouTubeOAuthInfo authInfo;
     ofxSSL curl;

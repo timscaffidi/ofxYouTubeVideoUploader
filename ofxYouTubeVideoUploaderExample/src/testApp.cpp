@@ -56,7 +56,7 @@ void testApp::keyReleased(int key){
         ofLog() << "raw path:\n" << fileDialogResult.getPath() << fileDialogResult.getName() << endl
         << "abs path:\n" << ofFilePath::getAbsolutePath(fileDialogResult.getPath() + fileDialogResult.getName()) << endl;
         
-        ytUploader.uploadVideoFile(fileDialogResult.getPath() , fileDialogResult.getName());
+        ytUploader.uploadVideoFile(fileDialogResult.getPath() , fileDialogResult.getName(), "test video", "uploaded with ofxYouTubeVideoUploader", "");
     }
 }
 

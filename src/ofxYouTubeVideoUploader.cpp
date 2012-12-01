@@ -232,7 +232,7 @@ bool ofxYouTubeVideoUploader::refreshAccess(){
     return authInfo.bIsAuthorized;
 }
 
-void ofxYouTubeVideoUploader::uploadVideoFile(string path, string fileName){
+void ofxYouTubeVideoUploader::uploadVideoFile(string path, string fileName, string title, string description, string keywords){
     
     curl.setup();
     curl.setURL("http://uploads.gdata.youtube.com/resumable/feeds/api/users/default/uploads");
@@ -240,9 +240,15 @@ void ofxYouTubeVideoUploader::uploadVideoFile(string path, string fileName){
     curl.addHeader("Authorization: " + authInfo.token_type + " " + authInfo.access_token);
     curl.addHeader("GData-Version: 2");
     curl.addHeader("X-GData-Key: key=" + authInfo.dev_key);
-    curl.addHeader("Content-Length: 0");
-    curl.addHeader("Content-Type:");
+//    curl.addHeader("Content-Length: 0");
+    curl.addHeader("Content-Type: application/atom+xml; charset=UTF-8");
     curl.addHeader("Slug: " + fileName);
+    if (title.empty()) {
+        title = fileName;
+    }
+    string xml = getMetaDataXMLString(title, description, keywords);
+    curl.setOpt(CURLOPT_POSTFIELDS, xml);
+    curl.setOpt(CURLOPT_POSTFIELDSIZE, xml.size());
     
     curl.perform();
     
@@ -251,6 +257,7 @@ void ofxYouTubeVideoUploader::uploadVideoFile(string path, string fileName){
     
     //find upload url in response header
     string header = curl.getResponseHeader();
+    string body = curl.getResponseBody();
     curl.cleanup();
     size_t loc_start = header.find("http://");
     size_t loc_end = header.find("Date: ");
@@ -272,7 +279,30 @@ void ofxYouTubeVideoUploader::uploadVideoFile(string path, string fileName){
         }
     }
     else {
-        ofLogError() << "ofxYouTubeVideoUploader::uploadVideoFile(): could not extract upload URL from server response\n";
+        ofLogError() << "ofxYouTubeVideoUploader::uploadVideoFile(): could not extract upload URL from server response\n"
+         << "-----CURL RESPONSE HEADER-----\n" << header << endl
+        << "-----CURL RESPONSE BODY-----\n" << body << endl;
     }
-    
+}
+
+string ofxYouTubeVideoUploader::getMetaDataXMLString(string title, string description, string keywords){
+    stringstream xml;
+    xml << "<?xml version=\"1.0\"?>"
+    << "<entry xmlns=\"http://www.w3.org/2005/Atom\""
+    << "  xmlns:media=\"http://search.yahoo.com/mrss/\""
+    << "  xmlns:yt=\"http://gdata.youtube.com/schemas/2007\">"
+    << "  <media:group>"
+    << "    <media:title type=\"plain\">"
+    << title
+    << "    </media:title>"
+    << "    <media:description type=\"plain\">"
+    << description
+    << "    </media:description>"
+    << "    <media:category scheme=\"http://gdata.youtube.com/schemas/2007/categories.cat\">People</media:category>"
+    << "    <media:keywords>"
+    << keywords
+    << "    </media:keywords>"
+    << "  </media:group>"
+    << "</entry>";
+    return xml.str();
 }
