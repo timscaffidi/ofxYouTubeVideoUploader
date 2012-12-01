@@ -1,0 +1,17 @@
+{
+   "access_token" : "",
+   "client_id" : "put your client_id here",
+   "client_secret" : "put your client_secret here",
+   "dev_key" : "put your dev_key here",
+   "device_code" : "",
+   "expires_in" : 3600,
+   "grant_type" : "http://oauth.net/grant_type/device/1.0",
+   "interval" : 5000,
+   "jsonFile" : "oAuthSettingsExample.json",
+   "refresh_token" : "",
+   "scope" : "https://uploads.gdata.youtube.com",
+   "token_type" : "",
+   "user_code" : "",
+   "verification_url" : "http://www.google.com/device"
+}
+
